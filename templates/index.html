@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>룸 예약 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">룸 예약 관리</h1>
+        <div class="d-flex justify-content-between mb-3">
+            <a href="{{ url_for('index', week_offset=week_offset-1) }}" 
+               class="btn btn-secondary {% if week_offset <= 0 %}disabled{% endif %}">이전 주</a>
+            <div>
+                <a href="{{ url_for('book') }}" class="btn btn-primary">예약하기</a>
+                <a href="{{ url_for('report') }}" class="btn btn-info">예약 리포트</a>
+            </div>
+            <a href="{{ url_for('index', week_offset=week_offset+1) }}" 
+               class="btn btn-secondary {% if week_offset >= 16 %}disabled{% endif %}">다음 주</a>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% for room in rooms %}
+            <h3>{{ room.name }}</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>시간</th>
+                        {% for date in week_dates %}
+                            <th>{{ date.strftime('%Y-%m-%d') }} ({{ ['월', '화', '수', '목', '금', '토', '일'][date.weekday()] }})</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in time_slots %}
+                        <tr>
+                            <td>{{ slot }}</td>
+                            {% for date in week_dates %}
+                                <td>
+                                    {% set booking = calendar[room.id][date.strftime('%Y-%m-%d')][slot] %}
+                                    {% if booking %}
+                                        {{ booking.user_name }} 
+                                        <a href="{{ url_for('cancel', booking_id=booking.id) }}" 
+                                           class="btn btn-sm btn-danger">취소</a>
+                                    {% else %}
+                                        비어 있음
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endfor %}
+    </div>
+</body>
+</html>

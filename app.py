@@ -78,7 +78,6 @@ def book():
             flash('종료 시간은 시작 시간보다 늦어야 합니다.', 'danger')
             return redirect(url_for('book'))
         
-        # 연속 슬롯 생성 및 그룹 ID 생성
         group_id = str(uuid.uuid4())
         slots_to_book = []
         current = start_dt
@@ -86,7 +85,6 @@ def book():
             slots_to_book.append(current.strftime("%H:%M"))
             current = current + timedelta(minutes=30)
         
-        # 모든 슬롯 예약 시도
         success = True
         for slot in slots_to_book:
             if not book_room(room_id, date, slot, user_name, password, group_id):
@@ -102,7 +100,7 @@ def book():
     rooms = get_rooms()
     week_dates = []
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    for i in range(16 * 7):  # 4개월 ≈ 16주
+    for i in range(16 * 7):
         week_dates.append(today + timedelta(days=i))
     time_slots = generate_time_slots()
     return render_template('book.html', rooms=rooms, week_dates=week_dates, time_slots=time_slots)
@@ -119,8 +117,9 @@ def cancel(booking_id):
 
 @app.route('/report')
 def report():
+    rooms = get_rooms()
     bookings = get_recent_bookings()
-    return render_template('report.html', bookings=bookings)
+    return render_template('report.html', bookings=bookings, rooms=rooms)
 
 if __name__ == '__main__':
     app.run(debug=True)

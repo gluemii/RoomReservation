@@ -1,0 +1,18 @@
+body {
+    background-color: #f8f9fa;
+}
+.table {
+    background-color: white;
+}
+.alert {
+    margin-top: 10px;
+}
+.d-flex {
+    align-items: center;
+}
+.btn-secondary:disabled {
+    opacity: 0.5;
+}
+.btn-info {
+    margin-left: 10px;
+}

@@ -55,11 +55,20 @@ def get_bookings():
 def get_recent_bookings():
     conn = get_db_connection()
     one_month_ago = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
-    bookings = [{'id': row['id'], 'room_id': row['room_id'], 'date': row['date'],
-                 'time_slot': row['time_slot'], 'user_name': row['user_name'],
-                 'group_id': row['group_id']}
-                for row in conn.execute('SELECT * FROM bookings WHERE date >= ? ORDER BY date, time_slot',
-                                       (one_month_ago,)).fetchall()]
+    # 그룹화된 예약 조회
+    c = conn.cursor()
+    c.execute('''
+        SELECT room_id, date, MIN(time_slot) as start_time, MAX(time_slot) as end_time, 
+               user_name, group_id
+        FROM bookings 
+        WHERE date >= ?
+        GROUP BY group_id
+        ORDER BY date, start_time
+    ''', (one_month_ago,))
+    bookings = [{'room_id': row['room_id'], 'date': row['date'], 
+                 'start_time': row['start_time'], 'end_time': row['end_time'], 
+                 'user_name': row['user_name'], 'group_id': row['group_id']}
+                for row in c.fetchall()]
     conn.close()
     return bookings
 
@@ -89,7 +98,6 @@ def cancel_booking(booking_id, password):
     if not bcrypt.check_password_hash(booking['password_hash'], password):
         conn.close()
         return False, "비밀번호가 일치하지 않습니다."
-    # 동일 group_id의 모든 예약 삭제
     c.execute('DELETE FROM bookings WHERE group_id = ?', (booking['group_id'],))
     conn.commit()
     conn.close()

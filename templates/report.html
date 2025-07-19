@@ -13,9 +13,10 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
-                        <th>룸 ID</th>
+                        <th>룸</th>
                         <th>날짜</th>
-                        <th>시간</th>
+                        <th>시작 시간</th>
+                        <th>종료 시간</th>
                         <th>예약자</th>
                         <th>그룹 ID</th>
                     </tr>
@@ -23,9 +24,16 @@
                 <tbody>
                     {% for booking in bookings %}
                         <tr>
-                            <td>{{ booking.room_id }}</td>
+                            <td>
+                                {% for room in rooms %}
+                                    {% if room.id == booking.room_id %}
+                                        {{ room.name }}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
                             <td>{{ booking.date }}</td>
-                            <td>{{ booking.time_slot }}</td>
+                            <td>{{ booking.start_time }}</td>
+                            <td>{{ booking.end_time }}</td>
                             <td>{{ booking.user_name }}</td>
                             <td>{{ booking.group_id }}</td>
                         </tr>
